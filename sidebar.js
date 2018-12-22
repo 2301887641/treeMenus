@@ -391,11 +391,18 @@ TreeMenu.prototype = {
         }
         //含有祖孙关系 之前点击的是被点击的后代
         if ($.contains(self.parent()[0], this.previousClickElement[0])) {
+            //如果是一级菜单的话
+            if(self.hasClass("monster-treeMenu-link-level1")){
+                if(!self.hasClass(TreeMenu.framework.defaultActiveTreeLinkClass)){
+                    self.addClass(TreeMenu.framework.defaultActiveTreeLinkClass);
+                }else{
+                    self.removeClass(TreeMenu.framework.defaultActiveTreeLinkClass)
+                }
+                //清除所有的下级
+                $("."+TreeMenu.framework.defaultActiveTreeLinkClass,self.next(".monster-treeMenu-link-child")).removeClass(TreeMenu.framework.defaultActiveTreeLinkClass);
+            }
             self.next(".monster-treeMenu-link-child").stop(false, true).slideUp(this.configure.duration, function () {
                 $(".monster-treeMenu-link-child", self.next(".monster-treeMenu-link-child")).hide()
-                if(self.hasClass("monster-treeMenu-link-level1")){
-                    $("."+TreeMenu.framework.defaultActiveTreeLinkClass,self.next(".monster-treeMenu-link-child")).removeClass(TreeMenu.framework.defaultActiveTreeLinkClass);
-                }
             });
             this.previousClickElement.removeClass(TreeMenu.framework.defaultActiveTreeLinkClass);
             this.previousClickElement = self;
