@@ -40,13 +40,13 @@ a{
   padding-left:20px;
 }
 /*鼠标经过第一排菜单的样式*/
-.monster-treeMenu-nav>.monster-treeMenu-nav-ul>li>a:hover,.monster-treeMenu-scroll>.monster-treeMenu-item>.monster-treeMenu-link-active{
+.monster-treeMenu-nav>.monster-treeMenu-nav-ul>li>a:hover{
     opacity: 1;
     font-weight: bolder;
     background: #136eb5;
 }
 /*普通菜单鼠标经过的样式*/
-.monster-treeMenu .monster-treeMenu-link:hover,.monster-treeMenu-item>.monster-treeMenu-childLink-active{
+.monster-treeMenu .monster-treeMenu-link:hover{
     opacity: 1;
     font-weight: bolder;
 }
@@ -95,4 +95,8 @@ a{
     transform-origin: top;
     top: 47%;
     transition: all .3s ease-out;
+}
+.monster-treeMenu-item>.monster-treeMenu-link-active:after{
+    transition: all .3s ease-out;
+    transform: rotate(225deg) translate(0, -50%);
 }
