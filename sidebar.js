@@ -385,6 +385,9 @@ TreeMenu.prototype = {
         if ($.contains(self.parent()[0], this.previousClickElement[0])) {
             self.next(".monster-treeMenu-link-child").stop(false, true).slideUp(200, function () {
                 $(".monster-treeMenu-link-child", self.next(".monster-treeMenu-link-child")).hide()
+                if(self.hasClass("monster-treeMenu-link-level1")){
+                    $("."+TreeMenu.framework.defaultActiveTreeChildLinkClass,self.next(".monster-treeMenu-link-child")).removeClass(TreeMenu.framework.defaultActiveTreeChildLinkClass);
+                }
             });
             this.previousClickElement.removeClass(TreeMenu.framework.defaultActiveTreeChildLinkClass);
             this.previousClickElement = self;
@@ -397,11 +400,13 @@ TreeMenu.prototype = {
             topElement.next(".monster-treeMenu-link-child").stop(false, true).slideUp(200, function () {
                 $(".monster-treeMenu-link-child", topElement.next(".monster-treeMenu-link-child")).hide()
             });
+            //清除白色选择
+            $("."+TreeMenu.framework.defaultActiveTreeChildLinkClass,topElement.next(".monster-treeMenu-link-child")).removeClass(TreeMenu.framework.defaultActiveTreeChildLinkClass);
+            $(topElement.next(".monster-treeMenu-link-child")).removeClass("monster-treeMenu-childLink-active")
             this.topElement=self;
             self.addClass(TreeMenu.framework.defaultActiveTreeLinkClass);
-            this.previousClickElement.removeClass(TreeMenu.framework.defaultActiveTreeChildLinkClass);
             this.previousClickElement = self;
-            self.next(".monster-treeMenu-link-child").stop(false, true).slideToggle(200)
+            self.next(".monster-treeMenu-link-child").stop(false, true).slideToggle(200);
             return
         }
         //后代同级点击
