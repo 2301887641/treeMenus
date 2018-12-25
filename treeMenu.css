@@ -23,7 +23,7 @@ a{
     z-index:40;
     box-shadow: 1px 0 20px rgba(0,0,0,.08);
     transition: .2s ease-in;
-    overflow: scroll;
+    overflow-y: scroll;
 }
 /*可滚动区域*/
 .monster-treeMenu .monster-treeMenu-scroll{
@@ -84,6 +84,7 @@ a{
     transition: all .2s ease-out;
     transform: rotate(180deg) translate(0, 34%);
 }
+/*a连接左侧区域*/
 .monster-treeMenu-link-left{
     position:relative;
 }
