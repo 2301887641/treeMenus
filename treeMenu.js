@@ -287,7 +287,9 @@ TreeMenu.framework = {
     //带有子级的ul结构
     linkUl: '<ul class="monster-treeMenu-link-child monster-treeMenu-nav-ul monster-hide">',
     //li标签
-    linkLi: '<li class="monster-treeMenu-item">',
+    linkLi: function(level){
+        return '<li class="monster-treeMenu-item' + " monster-treeMenu-li-level" + level+ '">';
+    },
     //a标签
     linkA: function (icon, name, hasChild, level) {
         return '<a class="monster-treeMenu-link' + " monster-treeMenu-link-level" + level +
@@ -435,7 +437,7 @@ TreeMenu.prototype = {
         ++level;
         for (let i of data) {
             let icon = TreeMenu.framework.leftIcon(i.icon, this.configure.icon),
-                li = $(TreeMenu.framework.linkLi);
+                li = $(TreeMenu.framework.linkLi(level));
             if (i[TreeMenu.structure.subMenu]) {
                 let ul = $(TreeMenu.framework.linkUl),
                     a = $(TreeMenu.framework.linkA(icon, i.name, true, level));
