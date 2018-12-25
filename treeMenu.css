@@ -47,7 +47,7 @@ a{
     position:relative;
 }
 /*左边的icon大小等*/
-.monster-treeMenu-link>i{
+.monster-treeMenu-link>.monster-treeMenu-link-left>i{
     margin-right:10px;
     font-size:16px;
     opacity:.6;
@@ -64,10 +64,6 @@ a{
 .monster-treeMenu .monster-treeMenu-link-child>li>a>.fa-circle-o-notch{
     width: 16px;
     font-size: 12px;
-}
-/*带有箭头的class*/
-.monster-treeMenu-link-arrow{
-    position: relative;
 }
 /*箭头*/
 .monster-treeMenu-link-arrow:after{
@@ -86,5 +82,8 @@ a{
 /*箭头上去*/
 .monster-treeMenu-item>.monster-treeMenu-link-active:after{
     transition: all .2s ease-out;
-    transform: rotate(180deg) translate(0, -50%);
+    transform: rotate(180deg) translate(0, 34%);
+}
+.monster-treeMenu-link-left{
+    position:relative;
 }

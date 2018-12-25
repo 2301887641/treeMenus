@@ -291,12 +291,12 @@ TreeMenu.framework = {
         return '<li class="monster-treeMenu-item' + " monster-treeMenu-li-level" + level+ '">';
     },
     //a标签
-    linkA: function (icon, name, hasChild, level) {
-        let padding="style='position:relative;left:"+level*10+"px;'";
+    linkA: function (icon, name, hasChild, level,relativeLeft) {
+        let padding="style='left:"+level*relativeLeft+"px;'";
         return '<a class="monster-treeMenu-link' + " monster-treeMenu-link-level" + level +
-            (!!hasChild ? TreeMenu.framework.defaultArrowClass : "") + '" href="#"><span '+padding+'  class="lefts">' + icon +
+            (!!hasChild ? TreeMenu.framework.defaultArrowClass : "") + '" href="#"><span '+padding+'  class="monster-treeMenu-link-left">' + icon +
             '<span class="monster-treeMenu-linkName">'
-            + name + '</span></a>';
+            + name + '</span></span></a>';
     }
 }
 //配置
@@ -315,6 +315,8 @@ TreeMenu.configure = {
     icon: TreeMenu.framework.defaultIconClass,
     //动画持续时间
     duration: 200,
+    //菜单偏移值
+    relativeLeft:10
 }
 //结构
 TreeMenu.structure = {id: "id", level: "level", name: "name", type: "type", url: "url", subMenu: "subMenu"};
@@ -441,13 +443,13 @@ TreeMenu.prototype = {
                 li = $(TreeMenu.framework.linkLi(level));
             if (i[TreeMenu.structure.subMenu]) {
                 let ul = $(TreeMenu.framework.linkUl),
-                    a = $(TreeMenu.framework.linkA(icon, i.name, true, level));
+                    a = $(TreeMenu.framework.linkA(icon, i.name, true, level,this.configure.relativeLeft));
                 this.submenuBind(a);
                 li.append(a).append(ul);
                 parent.append(li);
                 this.recursion(i[TreeMenu.structure.subMenu], ul, level);
             } else {
-                li.append($(TreeMenu.framework.linkA(icon, i.name, false, level)));
+                li.append($(TreeMenu.framework.linkA(icon, i.name, false, level,this.configure.relativeLeft)));
                 parent.append(li);
             }
         }
