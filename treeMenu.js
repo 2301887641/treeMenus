@@ -254,7 +254,7 @@ function TreeMenu(config) {
         throw Error("not find jQuery...")
     }
     if (!config instanceof Object) {
-        throw Error("argument error")
+        throw Error("arguments error")
     }
     Object.assign(this.configure = {}, TreeMenu.configure, config);
     this.init();
@@ -292,8 +292,9 @@ TreeMenu.framework = {
     },
     //a标签
     linkA: function (icon, name, hasChild, level) {
+        let padding="style='position:relative;left:"+level*10+"px;'";
         return '<a class="monster-treeMenu-link' + " monster-treeMenu-link-level" + level +
-            (!!hasChild ? TreeMenu.framework.defaultArrowClass : "") + '" href="#">' + icon +
+            (!!hasChild ? TreeMenu.framework.defaultArrowClass : "") + '" href="#"><span '+padding+'  class="lefts">' + icon +
             '<span class="monster-treeMenu-linkName">'
             + name + '</span></a>';
     }
