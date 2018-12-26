@@ -256,16 +256,25 @@ function TreeMenu(config) {
     if (!config instanceof Object) {
         throw Error("arguments error")
     }
-    Object.assign(this.configure = {}, TreeMenu.configure, config);
+    this.configure = $.extend(true, {}, TreeMenu.configure, config)
     this.init();
 }
 
-//Html骨骼
 TreeMenu.framework = {
-    //头
-    head: '<aside class="monster-treeMenu">',
     //nav
-    nav: '<nav class="monster-treeMenu-nav">',
+    NAV_CLASS_NAME: this.BASE_CLASS_PREFIX() + "-treeMenu-nav",
+    /**
+     * @return {string}
+     */
+    aside: function (base) {
+        return '<aside class="' + base + '-treeMenu">';
+    },
+    /**
+     * @return {string}
+     */
+    NAV: function () {
+        return '<nav class="' + this.NAV_CLASS_NAME + '">';
+    },
     //滑动区域
     scroll: '<ul class="monster-treeMenu-nav-ul monster-treeMenu-scroll">',
     //默认icon
@@ -287,14 +296,14 @@ TreeMenu.framework = {
     //带有子级的ul结构
     linkUl: '<ul class="monster-treeMenu-link-child monster-treeMenu-nav-ul monster-hide">',
     //li标签
-    linkLi: function(level){
-        return '<li class="monster-treeMenu-item' + " monster-treeMenu-li-level" + level+ '">';
+    linkLi: function (level) {
+        return '<li class="monster-treeMenu-item' + " monster-treeMenu-li-level" + level + '">';
     },
     //a标签
-    linkA: function (icon, name, hasChild, level,relativeLeft) {
-        let padding="style='left:"+level*relativeLeft+"px;'";
+    linkA: function (icon, name, hasChild, level, relativeLeft) {
+        let padding = "style='left:" + level * relativeLeft + "px;'";
         return '<a class="monster-treeMenu-link' + " monster-treeMenu-link-level" + level +
-            (!!hasChild ? TreeMenu.framework.defaultArrowClass : "") + '" href="#"><span '+padding+'  class="monster-treeMenu-link-left">' + icon +
+            (!!hasChild ? TreeMenu.framework.defaultArrowClass : "") + '" href="#"><span ' + padding + '  class="monster-treeMenu-link-left">' + icon +
             '<span class="monster-treeMenu-linkName">'
             + name + '</span></span></a>';
     }
@@ -316,7 +325,11 @@ TreeMenu.configure = {
     //动画持续时间
     duration: 200,
     //菜单偏移值
-    relativeLeft:10
+    relativeLeft: 10,
+    //基础字段
+    field: {},
+    //默认类前缀
+    defaultClassPrefix:"monster"
 }
 //结构
 TreeMenu.structure = {id: "id", level: "level", name: "name", type: "type", url: "url", subMenu: "subMenu"};
@@ -337,8 +350,8 @@ TreeMenu.prototype = {
     },
     //最终构建
     build: function (content) {
-        let nav = $(TreeMenu.framework.nav);
-        let aside = $(TreeMenu.framework.head).append(nav)
+        let nav = $(TreeMenu.framework.NAV());
+        let aside = $(TreeMenu.framework.aside()).append(nav)
         nav.append(content)
         this.html = aside;
     },
@@ -441,15 +454,15 @@ TreeMenu.prototype = {
         for (let i of data) {
             let icon = TreeMenu.framework.leftIcon(i.icon, this.configure.icon),
                 li = $(TreeMenu.framework.linkLi(level));
-            if (i[TreeMenu.structure.subMenu]) {
+            if (i[this.configure.field.subMenu]) {
                 let ul = $(TreeMenu.framework.linkUl),
-                    a = $(TreeMenu.framework.linkA(icon, i.name, true, level,this.configure.relativeLeft));
+                    a = $(TreeMenu.framework.linkA(icon, i.name, true, level, this.configure.relativeLeft));
                 this.submenuBind(a);
                 li.append(a).append(ul);
                 parent.append(li);
-                this.recursion(i[TreeMenu.structure.subMenu], ul, level);
+                this.recursion(i[this.configure.field.subMenu], ul, level);
             } else {
-                li.append($(TreeMenu.framework.linkA(icon, i.name, false, level,this.configure.relativeLeft)));
+                li.append($(TreeMenu.framework.linkA(icon, i.name, false, level, this.configure.relativeLeft)));
                 parent.append(li);
             }
         }
@@ -480,4 +493,5 @@ TreeMenu.prototype = {
         //     callback(this.data)
     }
 }
-new TreeMenu({selector: "#abc", data: menu})
+new TreeMenu({selector: "#abc", data: menu, field: {id: "ids"}})
+new TreeMenu({selector: "#cba", data: menu, field: {name: "ssdfsd"}})
