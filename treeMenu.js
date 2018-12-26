@@ -249,20 +249,22 @@ let menu = [
     {id: 5, level: 1, name: 'API 参考手册', icon: "fa fa-car", type: "link", parentId: 0, url: "/detail/api"}
 ];
 
-function TreeMenu(config) {
+function TreeMenu(config, callback=function(){alert("被点击的元素:"+e+" 被点击元素的url: "+url)}) {
     if (typeof $ === 'undefined') {
         throw Error("not find jQuery...")
     }
     if (!config instanceof Object) {
-        throw Error("arguments error")
+        throw Error("argument config error")
+    }
+    if (!callback instanceof Function) {
+        throw Error("argument callback error");
     }
     this.configure = $.extend(true, {}, TreeMenu.configure, config)
+    this.configure.callback = callback;
     this.init();
 }
 
 TreeMenu.framework = {
-    //nav
-    NAV_CLASS_NAME: this.BASE_CLASS_PREFIX() + "-treeMenu-nav",
     /**
      * @return {string}
      */
@@ -272,8 +274,8 @@ TreeMenu.framework = {
     /**
      * @return {string}
      */
-    NAV: function () {
-        return '<nav class="' + this.NAV_CLASS_NAME + '">';
+    nav: function (base) {
+        return '<nav class="' + base + '-treeMenu-nav">';
     },
     //滑动区域
     scroll: '<ul class="monster-treeMenu-nav-ul monster-treeMenu-scroll">',
@@ -327,9 +329,9 @@ TreeMenu.configure = {
     //菜单偏移值
     relativeLeft: 10,
     //基础字段
-    field: {},
+    field: {id: "id", level: "level", name: "name", type: "type", url: "url", subMenu: "subMenu"},
     //默认类前缀
-    defaultClassPrefix:"monster"
+    defaultClassPrefix: "monster"
 }
 //结构
 TreeMenu.structure = {id: "id", level: "level", name: "name", type: "type", url: "url", subMenu: "subMenu"};
@@ -350,8 +352,8 @@ TreeMenu.prototype = {
     },
     //最终构建
     build: function (content) {
-        let nav = $(TreeMenu.framework.NAV());
-        let aside = $(TreeMenu.framework.aside()).append(nav)
+        let nav = $(TreeMenu.framework.nav(this.configure.defaultClassPrefix));
+        let aside = $(TreeMenu.framework.aside(this.configure.defaultClassPrefix)).append(nav)
         nav.append(content)
         this.html = aside;
     },
@@ -374,79 +376,91 @@ TreeMenu.prototype = {
     state: function () {
     },
     //带有子菜单的绑定事件
-    submenuBind: function (element) {
+    submenuBind: function (element, isMenu) {
         let that = this;
         element.on("click", function (e) {
             e.stopPropagation();
-            that.submenuClickCallback($(this));
+            that.submenuClickCallback($(this), isMenu);
         })
     },
     //带有子菜单的点击事件回调
-    submenuClickCallback: function (self) {
-        //不存在上一个元素 顶级菜单
-        if (!this.previousClickElement) {
-            this.previousClickElement = self;
-            this.topElement = self
-            self.addClass(TreeMenu.framework.defaultActiveTreeLinkClass);
-            self.next(".monster-treeMenu-link-child").stop(false, true).slideDown(this.configure.duration);
-            return
-        }
-        //上一个元素是当前元素
-        if (this.previousClickElement.is(self)) {
-            if (!self.hasClass(TreeMenu.framework.defaultActiveTreeLinkClass)) {
-                self.addClass(TreeMenu.framework.defaultActiveTreeLinkClass);
-            } else {
-                self.removeClass(TreeMenu.framework.defaultActiveTreeLinkClass)
+    submenuClickCallback: function (self, isMenu) {
+        if (isMenu) {
+            if(!this.previousClickSubMenu){
+                self.addClass("monster-treeMenu-link-subMenu");
+                this.previousClickSubMenu = self;
+            }else{
+                this.previousClickSubMenu.removeClass("monster-treeMenu-link-subMenu");
+                self.addClass("monster-treeMenu-link-subMenu");
+                this.previousClickSubMenu = self;
             }
-            self.next(".monster-treeMenu-link-child").stop(false, true).slideToggle(this.configure.duration);
-            return
-        }
-        //含有祖孙关系 被点击的是之前点击的后代
-        if ($.contains(this.previousClickElement.parent()[0], self[0])) {
-            this.previousClickElement = self;
-            self.addClass(TreeMenu.framework.defaultActiveTreeLinkClass);
-            self.next(".monster-treeMenu-link-child").stop(false, true).slideToggle(this.configure.duration)
-            return
-        }
-        //含有祖孙关系 之前点击的是被点击的后代
-        if ($.contains(self.parent()[0], this.previousClickElement[0])) {
-            //如果是一级菜单的话
-            if (!self.hasClass(TreeMenu.framework.defaultActiveTreeLinkClass)) {
+            this.configure.callback(self,self.attr("_url"));
+        } else {
+            //不存在上一个元素 顶级菜单
+            if (!this.previousClickElement) {
+                this.previousClickElement = self;
+                this.topElement = self
                 self.addClass(TreeMenu.framework.defaultActiveTreeLinkClass);
-            } else {
-                self.removeClass(TreeMenu.framework.defaultActiveTreeLinkClass)
+                self.next(".monster-treeMenu-link-child").stop(false, true).slideDown(this.configure.duration);
+                return
             }
-            //清除所有的下级
-            $("." + TreeMenu.framework.defaultActiveTreeLinkClass, self.next(".monster-treeMenu-link-child")).removeClass(TreeMenu.framework.defaultActiveTreeLinkClass);
-            self.next(".monster-treeMenu-link-child").stop(false, true).slideUp(this.configure.duration, function () {
-                $(".monster-treeMenu-link-child", self.next(".monster-treeMenu-link-child")).hide()
-            });
+            //上一个元素是当前元素
+            if (this.previousClickElement.is(self)) {
+                if (!self.hasClass(TreeMenu.framework.defaultActiveTreeLinkClass)) {
+                    self.addClass(TreeMenu.framework.defaultActiveTreeLinkClass);
+                } else {
+                    self.removeClass(TreeMenu.framework.defaultActiveTreeLinkClass)
+                }
+                self.next(".monster-treeMenu-link-child").stop(false, true).slideToggle(this.configure.duration);
+                return
+            }
+            //含有祖孙关系 被点击的是之前点击的后代
+            if ($.contains(this.previousClickElement.parent()[0], self[0])) {
+                this.previousClickElement = self;
+                self.addClass(TreeMenu.framework.defaultActiveTreeLinkClass);
+                self.next(".monster-treeMenu-link-child").stop(false, true).slideToggle(this.configure.duration)
+                return
+            }
+            //含有祖孙关系 之前点击的是被点击的后代
+            if ($.contains(self.parent()[0], this.previousClickElement[0])) {
+                //如果是一级菜单的话
+                if (!self.hasClass(TreeMenu.framework.defaultActiveTreeLinkClass)) {
+                    self.addClass(TreeMenu.framework.defaultActiveTreeLinkClass);
+                } else {
+                    self.removeClass(TreeMenu.framework.defaultActiveTreeLinkClass)
+                }
+                //清除所有的下级
+                $("." + TreeMenu.framework.defaultActiveTreeLinkClass, self.next(".monster-treeMenu-link-child")).removeClass(TreeMenu.framework.defaultActiveTreeLinkClass);
+                self.next(".monster-treeMenu-link-child").stop(false, true).slideUp(this.configure.duration, function () {
+                    $(".monster-treeMenu-link-child", self.next(".monster-treeMenu-link-child")).hide()
+                });
+                this.previousClickElement.removeClass(TreeMenu.framework.defaultActiveTreeLinkClass);
+                this.previousClickElement = self;
+                return
+            }
+            //顶级菜单的点击
+            if (self.hasClass("monster-treeMenu-link-level1")) {
+                let topElement = this.topElement
+                topElement.removeClass(TreeMenu.framework.defaultActiveTreeLinkClass);
+                topElement.next(".monster-treeMenu-link-child").stop(false, true).slideUp(this.configure.duration, function () {
+                    $(".monster-treeMenu-link-child", topElement.next(".monster-treeMenu-link-child")).hide()
+                });
+                //清除白色选择
+                $("." + TreeMenu.framework.defaultActiveTreeLinkClass, topElement.next(".monster-treeMenu-link-child")).removeClass(TreeMenu.framework.defaultActiveTreeLinkClass);
+                $(topElement.next(".monster-treeMenu-link-child")).removeClass("monster-treeMenu-childLink-active")
+                this.topElement = self;
+                self.addClass(TreeMenu.framework.defaultActiveTreeLinkClass);
+                this.previousClickElement = self;
+                self.next(".monster-treeMenu-link-child").stop(false, true).slideToggle(this.configure.duration);
+                return
+            }
+            //后代同级点击
+            this.previousClickElement.next(".monster-treeMenu-link-child").stop(false, true).slideUp(this.configure.duration)
             this.previousClickElement.removeClass(TreeMenu.framework.defaultActiveTreeLinkClass);
-            this.previousClickElement = self;
-            return
-        }
-        //顶级菜单的点击
-        if (self.hasClass("monster-treeMenu-link-level1")) {
-            let topElement = this.topElement
-            topElement.removeClass(TreeMenu.framework.defaultActiveTreeLinkClass);
-            topElement.next(".monster-treeMenu-link-child").stop(false, true).slideUp(this.configure.duration, function () {
-                $(".monster-treeMenu-link-child", topElement.next(".monster-treeMenu-link-child")).hide()
-            });
-            //清除白色选择
-            $("." + TreeMenu.framework.defaultActiveTreeLinkClass, topElement.next(".monster-treeMenu-link-child")).removeClass(TreeMenu.framework.defaultActiveTreeLinkClass);
-            $(topElement.next(".monster-treeMenu-link-child")).removeClass("monster-treeMenu-childLink-active")
-            this.topElement = self;
+            self.next(".monster-treeMenu-link-child").stop(false, true).slideToggle(this.configure.duration)
             self.addClass(TreeMenu.framework.defaultActiveTreeLinkClass);
             this.previousClickElement = self;
-            self.next(".monster-treeMenu-link-child").stop(false, true).slideToggle(this.configure.duration);
-            return
         }
-        //后代同级点击
-        this.previousClickElement.next(".monster-treeMenu-link-child").stop(false, true).slideUp(this.configure.duration)
-        this.previousClickElement.removeClass(TreeMenu.framework.defaultActiveTreeLinkClass);
-        self.next(".monster-treeMenu-link-child").stop(false, true).slideToggle(this.configure.duration)
-        self.addClass(TreeMenu.framework.defaultActiveTreeLinkClass);
-        this.previousClickElement = self;
     },
     //递归解析json
     recursion: function (data, parent, level) {
@@ -457,12 +471,15 @@ TreeMenu.prototype = {
             if (i[this.configure.field.subMenu]) {
                 let ul = $(TreeMenu.framework.linkUl),
                     a = $(TreeMenu.framework.linkA(icon, i.name, true, level, this.configure.relativeLeft));
-                this.submenuBind(a);
+                this.submenuBind(a, false);
                 li.append(a).append(ul);
                 parent.append(li);
                 this.recursion(i[this.configure.field.subMenu], ul, level);
             } else {
-                li.append($(TreeMenu.framework.linkA(icon, i.name, false, level, this.configure.relativeLeft)));
+                let link = $(TreeMenu.framework.linkA(icon, i.name, false, level, this.configure.relativeLeft));
+                link.attr("_url",i[this.configure.field.url])
+                this.submenuBind(link, true);
+                li.append(link);
                 parent.append(li);
             }
         }
@@ -493,5 +510,6 @@ TreeMenu.prototype = {
         //     callback(this.data)
     }
 }
-new TreeMenu({selector: "#abc", data: menu, field: {id: "ids"}})
-new TreeMenu({selector: "#cba", data: menu, field: {name: "ssdfsd"}})
+new TreeMenu({selector: "#abc", data: menu, field: {id: "ids"}},function(e,url){
+    alert("被点击的元素:"+e+" 被点击元素的url: "+url)
+})

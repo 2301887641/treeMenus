@@ -30,8 +30,8 @@ a{
     height:calc(100% - 20px);
     position:relative;
 }
-/*鼠标经过菜单的样式*/
-.monster-treeMenu-nav-ul>li>a:hover{
+/*鼠标经过菜单的样式 和子菜单 */
+.monster-treeMenu-nav-ul>li>a:hover,.monster-treeMenu-link-subMenu{
     opacity: 1;
     background: #136eb5;
 }
