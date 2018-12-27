@@ -352,7 +352,7 @@ TreeMenu.configure = {
     //动画持续时间
     duration: 200,
     //菜单偏移值
-    relativeLeft: 10,
+    relativeLeft: 15,
     //基础字段
     field: {id: "id", level: "level", name: "name", type: "type", url: "url", subMenu: "subMenu"},
     //默认类前缀
@@ -414,39 +414,51 @@ TreeMenu.prototype = {
     submenuClickCallback: function (self, isMenu) {
         let that = this;
         if (isMenu) {
+            //不存在上一个元素
             if (!this.previousClickSubMenu) {
                 self.addClass("monster-treeMenu-link-subMenu");
                 this.previousClickSubMenu = self;
                 return
             }
+            //上一个元素是当前元素
             if (this.previousClickSubMenu.is(self)) {
                 return
             }
+            //一级菜单的点击
             if (self.hasClass("monster-treeMenu-link-level1")) {
+                //清除
                 this.topElement.next(".monster-treeMenu-link-child").stop(false, true).slideUp(this.configure.duration, function () {
                     $(".monster-treeMenu-link-child", that.topElement.next(".monster-treeMenu-link-child")).hide()
                     that.topElement.removeClass(TreeMenu.framework.defaultActiveTreeDropDownClass(that.configure.defaultClassPrefix));
-                    that.topElement=null;
+                    that.topElement = null;
                 });
                 this.previousClickSubMenu.removeClass("monster-treeMenu-link-subMenu");
                 self.addClass("monster-treeMenu-link-subMenu");
                 this.previousClickSubMenu = self;
-                this.previousClickElement=null;
+                this.previousClickElement = null;
                 return
             }
-            if (!this.isCloseChild && this.unClosedTopElement) {
-                this.unClosedTopElement.next(".monster-treeMenu-link-child").stop(false, true).slideUp(this.configure.duration, function () {
-                    that.previousClickSubMenu.removeClass("monster-treeMenu-link-subMenu");
-                    self.addClass("monster-treeMenu-link-subMenu");
-                    that.previousClickSubMenu = self;
-                    that.isCloseChild = true
-                    that.unClosedTopElement = null
-                });
-            } else {
-                this.previousClickSubMenu.removeClass("monster-treeMenu-link-subMenu");
-                self.addClass("monster-treeMenu-link-subMenu");
-                this.previousClickSubMenu = self;
+            //含有祖孙关系
+            if($.contains(this.topElement.next(".monster-treeMenu-link-child")[0],self[0])){
+                if($.contains(this.topElement.next(".monster-treeMenu-link-child")[0],this.previousClickElement[0])){
+                    let selfClassName=self.attr("class"),previousClassName=this.previousClickElement.attr("class")
+                    ,reg=/monster-treeMenu-link-level(\d+)/,selfResult=selfClassName.match(reg),previousResult=previousClassName.match(reg);
+                    if(selfResult && previousResult){
+                        //之前点击的是被点击的后代
+                       if(selfResult[1]<previousResult[1]){
+                           console.log(self.parent().siblings())
+                       }
+                    }else{
+                        throw Error("tree build error...");
+                    }
+                }
             }
+
+
+            //需要清除之前的下拉
+            this.previousClickSubMenu.removeClass("monster-treeMenu-link-subMenu");
+            self.addClass("monster-treeMenu-link-subMenu");
+            this.previousClickSubMenu = self;
             this.configure.callback(self, self.attr("_url"));
         } else {
             //不存在上一个元素 顶级菜单
@@ -505,7 +517,7 @@ TreeMenu.prototype = {
                     that.isCloseChild && $(".monster-treeMenu-link-child", topElement.next(".monster-treeMenu-link-child")).hide()
                 });
                 //清除白色选择
-                $("." + TreeMenu.framework.defaultActiveTreeDropDownClass(this.configure.defaultClassPrefix), topElement.next(".monster-treeMenu-link-child")).removeClass(TreeMenu.framework.defaultActiveTreeDropDownClass(this.configure.defaultClassPrefix));
+                // that.isCloseChild && $("." + TreeMenu.framework.defaultActiveTreeDropDownClass(this.configure.defaultClassPrefix), topElement.next(".monster-treeMenu-link-child")).removeClass(TreeMenu.framework.defaultActiveTreeDropDownClass(this.configure.defaultClassPrefix));
                 $(topElement.next(".monster-treeMenu-link-child")).removeClass("monster-treeMenu-childLink-active")
                 this.topElement = self;
                 self.addClass(TreeMenu.framework.defaultActiveTreeDropDownClass(this.configure.defaultClassPrefix));
