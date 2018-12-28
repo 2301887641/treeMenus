@@ -314,26 +314,40 @@ TreeMenu.framework = {
     /**
      * 默认激活的tree下拉class
      * @param base
+     * @param middlePrefix
      * @returns {string}
      */
     defaultActiveTreeDropDownClass: function (base, middlePrefix) {
         return base + '-' + middlePrefix + '-link-active';
     },
     //默认子类激活的tree类名
-    defaultActiveTreeChildLinkClass: 'monster-treeMenu-childLink-active',
-    //icon内容
-    iconHtml: function (icon) {
+    // defaultActiveTreeChildLinkClass: 'monster-treeMenu-childLink-active',
+    /**
+     * icon内容
+     * @param icon
+     * @returns {string}
+     */
+    icon: function (icon) {
         return '<i class="' + icon + '" aria-hidden="true"></i>'
     },
-    //获取左侧icon内容
-    leftIcon: function (icon, configIcon) {
-        return !!icon ? this.iconHtml(icon) : !!configIcon ? this.iconHtml(configIcon) : "";
+    /**
+     * 带有子级的ul结构
+     * @param base
+     * @param middlePrefix
+     * @returns {string}
+     */
+    ul: function (base, middlePrefix) {
+        return '<ul class="' + base + '-' + middlePrefix + '-link-child ' + base + '-' + middlePrefix + '-nav-ul ' + base + '-' + 'hide">';
     },
-    //带有子级的ul结构
-    linkUl: '<ul class="monster-treeMenu-link-child monster-treeMenu-nav-ul monster-hide">',
-    //li标签
-    linkLi: function (level) {
-        return '<li class="monster-treeMenu-item' + " monster-treeMenu-li-level" + level + '">';
+    /**
+     * li标签
+     * @param base
+     * @param middlePrefix
+     * @param level
+     * @returns {string}
+     */
+    li: function (base, middlePrefix, level) {
+        return '<li class="' + base + '-' + middlePrefix + '-' + 'item ' + base + '-' + middlePrefix + "-li-level" + level + '">';
     },
     //a标签
     shuttleMenu: function (base, middlePrefix, icon, name, hasChild, level, arrow, spanPadding) {
@@ -438,6 +452,19 @@ TreeMenu.prototype = {
                         that.foundation().arrowClass(),
                         spanPadding
                     );
+                }
+            },
+            icon: function (icon) {
+                return !!icon ? TreeMenu.framework.icon(icon) : !!that.configure.icon ? TreeMenu.framework.icon(that.configure.icon) : "";
+            },
+            ul: function () {
+                if (that.configure.type === 1) {
+                    return TreeMenu.framework.ul(that.configure.defaultTreeMenuClassPrefix, that.configure.defaultMiddlePrefix);
+                }
+            },
+            li: function (level) {
+                if (that.configure.type === 1) {
+                    return TreeMenu.framework.li(that.configure.defaultTreeMenuClassPrefix, that.configure.defaultMiddlePrefix);
                 }
             }
         }
@@ -576,7 +603,7 @@ TreeMenu.prototype = {
                 topElement.next(".monster-treeMenu-link-child").stop(false, true).slideUp(this.configure.duration, function () {
                     that.isCloseChild && $(".monster-treeMenu-link-child", topElement.next(".monster-treeMenu-link-child")).hide()
                 });
-                $(topElement.next(".monster-treeMenu-link-child")).removeClass("monster-treeMenu-childLink-active")
+                // $(topElement.next(".monster-treeMenu-link-child")).removeClass("monster-treeMenu-childLink-active")
                 this.topElement = self;
                 self.addClass(this.foundation().activeTreeDropDownClass());
                 this.previousClickElement = self;
@@ -595,10 +622,10 @@ TreeMenu.prototype = {
     recursion: function (data, parent, level) {
         ++level;
         for (let i of data) {
-            let icon = TreeMenu.framework.leftIcon(i.icon, this.configure.icon),
-                li = $(TreeMenu.framework.linkLi(level));
+            let icon = this.foundation().icon(i.icon),
+                li = $(this.foundation().li(level));
             if (i[this.configure.field.subMenu]) {
-                let ul = $(TreeMenu.framework.linkUl),
+                let ul = $(this.foundation().ul()),
                     a = $(this.foundation().shuttleMenu(icon, i.name, true, level));
                 this.submenuBind(a, false);
                 li.append(a).append(ul);
