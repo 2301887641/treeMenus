@@ -16,6 +16,9 @@ let menu = [
                         id: 7, level: 2, name: '简介333', parentId: 6, type: "link", url: "/detail/tutorial"
                     },
                     {
+                        id: 7, level: 2, name: '简介222', parentId: 6, type: "link", url: "/detail/tutorial"
+                    },
+                    {
                         id: 8,
                         level: 2,
                         name: '简介2',
@@ -446,15 +449,25 @@ TreeMenu.prototype = {
                     if(selfResult && previousResult){
                         //之前点击的是被点击的后代
                        if(selfResult[1]<previousResult[1]){
-                           console.log(self.parent().siblings())
+                           self.parent().siblings().has(".monster-treeMenu-link-subMenu").stop(false, true).slideUp(this.configure.duration);
+                           this.previousClickSubMenu.removeClass("monster-treeMenu-link-subMenu");
+                           self.addClass("monster-treeMenu-link-subMenu");
+                           this.previousClickSubMenu = self;
+                           this.configure.callback(self, self.attr("_url"));
+                           return
                        }
                     }else{
                         throw Error("tree build error...");
                     }
                 }
             }
-
-
+            //将上一个一级菜单下的关闭掉
+            if(this.unClosedTopElement){
+                console.log(this.unClosedTopElement)
+                $(".monster-treeMenu-link-child", this.unClosedTopElement.next(".monster-treeMenu-link-child")).hide();
+                this.unClosedTopElement=null;
+                that.isCloseChild=null;
+            }
             //需要清除之前的下拉
             this.previousClickSubMenu.removeClass("monster-treeMenu-link-subMenu");
             self.addClass("monster-treeMenu-link-subMenu");
