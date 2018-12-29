@@ -31,7 +31,7 @@ a{
     position:relative;
 }
 /*鼠标经过菜单的样式 和子菜单 */
-.monster-treeMenu-nav-ul>li>a:hover,.monster-treeMenu-link-subMenu{
+.monster-treeMenu-nav-ul>li>a:hover,.monster-treeMenu-shuttle-active{
     opacity: 1;
     background: #136eb5;
 }
@@ -80,7 +80,7 @@ a{
     transform: rotate(0deg) translate(0, -50%);
 }
 /*箭头上去*/
-.monster-treeMenu-item>.monster-treeMenu-link-active:after{
+.monster-treeMenu-item>.monster-treeMenu-dropDown-active:after{
     transition: all .2s ease-out;
     transform: rotate(180deg) translate(0, 34%);
 }
