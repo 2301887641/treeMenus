@@ -558,7 +558,7 @@ TreeMenu.prototype = {
              */
             shuttleWithoutPreviousClickElement:function(self){
                 self.addClass(that.foundation().shuttleActive());
-                that.previousClickSubMenu = self;
+                that.previousClickShuttleMenu = self;
             },
             /**
              * 上一个元素是当前元素
@@ -582,18 +582,19 @@ TreeMenu.prototype = {
              */
             shuttleGrandsonClick:function(self){
                 let selfClassName = self.attr("class"),
-                    previousClassName = that.previousClickElement.attr("class"),
-                    reg = /monster-treeMenu-link-level(\d+)/,
+                    previousClassName = that.previousClickShuttleMenu.attr("class"),
+                    regString=that.foundation().level1Class().substring(0,that.foundation().level1Class().length-1),
+                    reg = new RegExp(regString+"(\\d+)"),
                     selfResult = selfClassName.match(reg),
                     previousResult = previousClassName.match(reg);
                 if (selfResult && previousResult) {
                     //之前点击的是被点击的后代
                     if (selfResult[1] < previousResult[1]) {
-                        self.parent().siblings().has(".monster-treeMenu-link-subMenu").stop(false, true).slideUp(this.configure.duration);
-                        this.previousClickSubMenu.removeClass("monster-treeMenu-link-subMenu");
-                        self.addClass("monster-treeMenu-link-subMenu");
-                        this.previousClickSubMenu = self;
-                        this.configure.callback(self, self.attr("_url"));
+                        console.log(self.parent().siblings().has("."+that.foundation().activeTreeDropDownClass()))
+                        that.animate().slideUp(self.parent().siblings().has("."+that.foundation().activeTreeDropDownClass()));
+                        that.previousClickShuttleMenu.removeClass(that.foundation().shuttleActive());
+                        self.addClass(that.foundation().shuttleActive());
+                        that.previousClickShuttleMenu = self;
                     }
                 } else {
                     throw Error("tree build error...");
@@ -669,17 +670,17 @@ TreeMenu.prototype = {
         let that = this;
         if (isShuttleLink) {
             //不存在上一个元素
-            if (!this.previousClickSubMenu) {
+            if (!this.previousClickShuttleMenu) {
                 this.state().shuttleWithoutPreviousClickElement(self);
                 return
             }
             //上一个元素是当前元素
-            if (this.previousClickSubMenu.is(self)) {
+            if (this.previousClickShuttleMenu.is(self)) {
                 return
             }
             //含有祖孙关系  点击的是当前顶级栏目的子类
             if ($.contains(this.topElement.next(that.foundation().linkChildClass())[0], self[0])) {
-                if ($.contains(this.topElement.next(that.foundation().linkChildClass())[0], this.previousClickElement[0])) {
+                if ($.contains(this.topElement.next(that.foundation().linkChildClass())[0], this.previousClickShuttleMenu[0])) {
                     this.state().shuttleGrandsonClick(self);
                     return
                 }
