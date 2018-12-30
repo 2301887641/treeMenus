@@ -499,20 +499,20 @@ TreeMenu.prototype = {
             linkChildClass: function () {
                 return "." + that.configure.defaultTreeMenuClassPrefix + '-' + that.configure.defaultMiddlePrefix + "-link-child";
             },
-            level1Class:function(){
-                return that.configure.defaultTreeMenuClassPrefix+"-"+that.configure.defaultMiddlePrefix + "-link-level1";
+            level1Class: function () {
+                return that.configure.defaultTreeMenuClassPrefix + "-" + that.configure.defaultMiddlePrefix + "-link-level1";
             },
-            shuttleActive:function(){
-                return that.configure.defaultTreeMenuClassPrefix+'-'+that.configure.defaultMiddlePrefix+'-shuttle-active';
+            shuttleActive: function () {
+                return that.configure.defaultTreeMenuClassPrefix + '-' + that.configure.defaultMiddlePrefix + '-shuttle-active';
             }
         }
     },
     animate: function () {
         let that = this;
         return {
-            slideUp: function (ele,callback) {
-                ele.stop(false, true).slideUp(that.configure.duration,function(){
-                    if(callback instanceof Function){
+            slideUp: function (ele, callback) {
+                ele.stop(false, true).slideUp(that.configure.duration, function () {
+                    if (callback instanceof Function) {
                         callback()
                     }
                 });
@@ -520,7 +520,7 @@ TreeMenu.prototype = {
             slideDown: function (ele) {
                 ele.stop(false, true).slideDown(that.configure.duration);
             },
-            slideToggle:function(ele){
+            slideToggle: function (ele) {
                 ele.stop(false, true).slideToggle(that.configure.duration);
             }
         }
@@ -556,7 +556,7 @@ TreeMenu.prototype = {
              * 不存在上一个元素
              * @param self
              */
-            shuttleWithoutPreviousClickElement:function(self){
+            shuttleWithoutPreviousClickElement: function (self) {
                 self.addClass(that.foundation().shuttleActive());
                 that.previousClickShuttleMenu = self;
             },
@@ -564,38 +564,38 @@ TreeMenu.prototype = {
              * 上一个元素是当前元素
              * @param self
              */
-            dropDownSelfClick:function(self,callback){
+            dropDownSelfClick: function (self, callback) {
                 self.toggleClass(that.foundation().activeTreeDropDownClass());
-                that.animate().slideToggle(self.next(that.foundation().linkChildClass()),callback);
+                that.animate().slideToggle(self.next(that.foundation().linkChildClass()), callback);
             },
             /**
              * 含有祖孙关系 被点击的是之前点击的后代
              * @param self
              */
-            dropDownGrandsonClick:function(self,callback){
+            dropDownGrandsonClick: function (self, callback) {
                 that.previousClickElement = self;
-                that.state().dropDownSelfClick(self,callback);
+                that.state().dropDownSelfClick(self, callback);
             },
             /**
              * 含有祖孙关系  点击的是当前顶级栏目的子类
              * @param self
              */
-            shuttleGrandsonClick:function(self){
+            shuttleGrandsonClick: function (self) {
                 let selfClassName = self.attr("class"),
                     previousClassName = that.previousClickShuttleMenu.attr("class"),
-                    regString=that.foundation().level1Class().substring(0,that.foundation().level1Class().length-1),
-                    reg = new RegExp(regString+"(\\d+)"),
+                    regString = that.foundation().level1Class().substring(0, that.foundation().level1Class().length - 1),
+                    reg = new RegExp(regString + "(\\d+)"),
                     selfResult = selfClassName.match(reg),
                     previousResult = previousClassName.match(reg);
                 if (selfResult && previousResult) {
                     //之前点击的是被点击的后代
                     if (selfResult[1] < previousResult[1]) {
-                        console.log(self.parent().siblings().has("."+that.foundation().activeTreeDropDownClass()))
-                        that.animate().slideUp(self.parent().siblings().has("."+that.foundation().activeTreeDropDownClass()));
-                        that.previousClickShuttleMenu.removeClass(that.foundation().shuttleActive());
-                        self.addClass(that.foundation().shuttleActive());
-                        that.previousClickShuttleMenu = self;
+                        //关闭之前的下拉
+                        let dropDownParent = self.parent().siblings().has("." + that.foundation().activeTreeDropDownClass());
+                        that.animate().slideUp($(that.foundation().linkChildClass(), dropDownParent));
+                        $("." + that.foundation().activeTreeDropDownClass(), dropDownParent).removeClass(that.foundation().activeTreeDropDownClass());
                     }
+                    that.state()._shuttleSelfAndRemove(self);
                 } else {
                     throw Error("tree build error...");
                 }
@@ -604,47 +604,77 @@ TreeMenu.prototype = {
              * 含有祖孙关系 之前点击的是被点击的后代  有可能是顶级菜单点击
              * @param self
              */
-            dropDownForefatherClick:function(self){
+            dropDownForefatherClick: function (self) {
                 self.toggleClass(that.foundation().activeTreeDropDownClass());
-                that.animate().slideUp(self.next(that.foundation().linkChildClass()),function(){
+                that.animate().slideUp(self.next(that.foundation().linkChildClass()), function () {
                     //隐藏ul
                     $(that.foundation().linkChildClass(), self.next(that.foundation().linkChildClass())).hide();
                     //去除所有子类展开的下拉
-                    $("."+that.foundation().activeTreeDropDownClass(), self.next(that.foundation().linkChildClass())).removeClass(that.foundation().activeTreeDropDownClass());
+                    $("." + that.foundation().activeTreeDropDownClass(), self.next(that.foundation().linkChildClass())).removeClass(that.foundation().activeTreeDropDownClass());
                 });
                 that.previousClickElement = self;
             },
             /**
              * 跨菜单的顶级菜单的点击
              */
-            dropDownTopMenuClick:function(self){
+            dropDownTopMenuClick: function (self) {
                 let topElement = that.topElement;
                 //先关闭掉
                 topElement.removeClass(that.foundation().activeTreeDropDownClass());
-                that.animate().slideUp(topElement.next(that.foundation().linkChildClass()),function(){
+                that.animate().slideUp(topElement.next(that.foundation().linkChildClass()), function () {
                     //隐藏ul
                     $(that.foundation().linkChildClass(), topElement.next(that.foundation().linkChildClass())).hide();
                     //去除所有子类展开的下拉
-                    $("."+that.foundation().activeTreeDropDownClass(), topElement.next(that.foundation().linkChildClass())).removeClass(that.foundation().activeTreeDropDownClass());
+                    $("." + that.foundation().activeTreeDropDownClass(), topElement.next(that.foundation().linkChildClass())).removeClass(that.foundation().activeTreeDropDownClass());
                 });
                 that.topElement = self;
-                that.state()._slideDown(self);
+                that.state()._dropDownSlideDown(self);
+            },
+            /**
+             * 一级菜单的点击
+             * @param self
+             */
+            shuttleTopMenuClick: function (self) {
+                if (that.topElement) {
+                    let ul=that.topElement.next(that.foundation().linkChildClass());
+                    that.animate().slideUp(ul,function () {
+                        //清除箭头
+                        $("."+that.foundation().activeTreeDropDownClass(),ul).removeClass(that.foundation().activeTreeDropDownClass());
+                        //隐藏ul
+                        $(that.foundation().linkChildClass(), ul).hide();
+                        that.topElement.removeClass(that.foundation().activeTreeDropDownClass());
+                        that.topElement = null;
+                        that.previousClickElement = null;
+                    });
+                }
+                that.state()._shuttleSelfAndRemove(self);
             },
             /**
              * 后代同级点击
              * @param self
              */
-            dropDownSiblingClick:function(self){
+            dropDownSiblingClick: function (self) {
                 //先将之前的收缩
                 that.animate().slideUp(that.previousClickElement.next(that.foundation().linkChildClass()));
                 that.previousClickElement.removeClass(that.foundation().activeTreeDropDownClass());
                 that.state()._dropDownSlideDown(self);
             },
-            _dropDownSlideDown:function(self){
+            /**
+             * 顶级栏目的子类点击
+             * @param self
+             */
+            shuttleChildClick: function (self) {
+                that.state()._shuttleSelfAndRemove(self);
+            },
+            _dropDownSlideDown: function (self) {
                 that.animate().slideDown(self.next(that.foundation().linkChildClass()));
                 self.addClass(that.foundation().activeTreeDropDownClass());
                 that.previousClickElement = self;
             },
+            _shuttleSelfAndRemove: function (self) {
+                that.previousClickShuttleMenu.removeClass(that.foundation().shuttleActive());
+                that.state().shuttleWithoutPreviousClickElement(self);
+            }
 
         }
     }
@@ -671,81 +701,45 @@ TreeMenu.prototype = {
         if (isShuttleLink) {
             //不存在上一个元素
             if (!this.previousClickShuttleMenu) {
-                this.state().shuttleWithoutPreviousClickElement(self);
-                return
+                return this.state().shuttleWithoutPreviousClickElement(self);
             }
             //上一个元素是当前元素
             if (this.previousClickShuttleMenu.is(self)) {
                 return
             }
+            //一级菜单的点击
+            if (self.hasClass(this.foundation().level1Class())) {
+                return this.state().shuttleTopMenuClick(self);
+            }
             //含有祖孙关系  点击的是当前顶级栏目的子类
-            if ($.contains(this.topElement.next(that.foundation().linkChildClass())[0], self[0])) {
+            if (this.topElement && $.contains(this.topElement.next(that.foundation().linkChildClass())[0], self[0])) {
                 if ($.contains(this.topElement.next(that.foundation().linkChildClass())[0], this.previousClickShuttleMenu[0])) {
-                    this.state().shuttleGrandsonClick(self);
-                    return
+                    return this.state().shuttleGrandsonClick(self);
+                } else {
+                    //顶级栏目的子类点击
+                    return this.state().shuttleChildClick(self);
                 }
             }
-            //一级菜单的点击
-            if (self.hasClass("monster-treeMenu-link-level1")) {
-                //清除
-                this.topElement.next(".monster-treeMenu-link-child").stop(false, true).slideUp(this.configure.duration, function () {
-                    $(".monster-treeMenu-link-child", that.topElement.next(".monster-treeMenu-link-child")).hide()
-                    that.topElement.removeClass(that.foundation().activeTreeDropDownClass());
-                    that.topElement = null;
-                });
-                this.previousClickSubMenu.removeClass("monster-treeMenu-link-subMenu");
-                self.addClass("monster-treeMenu-link-subMenu");
-                this.previousClickSubMenu = self;
-                this.previousClickElement = null;
-                return
-            }
-            //将上一个一级菜单下的关闭掉
-            if (this.unClosedTopElement) {
-                $(".monster-treeMenu-link-child", this.unClosedTopElement.next(".monster-treeMenu-link-child")).hide();
-                this.unClosedTopElement = null;
-                this.isCloseChild = null;
-            }
-            //需要清除之前的下拉
-            this.previousClickSubMenu.removeClass("monster-treeMenu-link-subMenu");
-            self.addClass("monster-treeMenu-link-subMenu");
-            this.previousClickSubMenu = self;
-            this.configure.callback(self, self.attr("_url"));
         } else {
             //不存在上一个点击元素 顶级菜单
             if (!this.previousClickElement) {
-                this.state().dropDownMenuWithoutPreviousClickElement(self);
-                return
+                return this.state().dropDownMenuWithoutPreviousClickElement(self);
             }
             //上一个元素是当前元素
             if (this.previousClickElement.is(self)) {
-                this.state().dropDownSelfClick(self);
-                return
+                return this.state().dropDownSelfClick(self);
             }
             //含有祖孙关系 被点击的是之前点击的后代
             if ($.contains(this.previousClickElement.parent()[0], self[0])) {
-                this.state().dropDownGrandsonClick(self);
-                return
+                return this.state().dropDownGrandsonClick(self);
             }
             //含有祖孙关系 之前点击的是被点击的后代
             if ($.contains(self.parent()[0], this.previousClickElement[0])) {
-                this.state().dropDownForefatherClick(self);
-                return
+                return this.state().dropDownForefatherClick(self);
             }
             //顶级菜单的点击
             if (self.hasClass(this.foundation().level1Class())) {
-                this.state().dropDownTopMenuClick(self);
-                // let topElement = this.topElement;
-                // if (this.previousClickSubMenu) {
-                //     if ($.contains(this.topElement.parent()[0], this.previousClickSubMenu[0])) {
-                //         this.isCloseChild = false;
-                //         this.unClosedTopElement = this.topElement;
-                //     }
-                // }
-                // topElement.next(".monster-treeMenu-link-child").stop(false, true).slideUp(this.configure.duration, function () {
-                //     that.isCloseChild && $(".monster-treeMenu-link-child", topElement.next(".monster-treeMenu-link-child")).hide()
-                // });
-                // //$(topElement.next(".monster-treeMenu-link-child")).removeClass("monster-treeMenu-childLink-active")
-                return
+                return this.state().dropDownTopMenuClick(self);
             }
             //后代同级点击
             this.state().dropDownSiblingClick(self);
