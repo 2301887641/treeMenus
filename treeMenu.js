@@ -619,12 +619,7 @@ TreeMenu.prototype = {
             dropDownForefatherClick: function (self) {
                 self.toggleClass(that.foundation().activeTreeDropDownClass());
                 that.animate().slideUp(self.next(that.foundation().linkChildClass()), function () {
-                    if (that.shuttleMenuActive && that.previousClickShuttleMenu && $.contains(self.parent()[0], that.previousClickShuttleMenu[0])) {
-                        //去除所有子类展开的下拉
-                        that.state()._dropDownForefatherClickHide(that.previousClickShuttleMenu.parent().siblings(), that.previousClickShuttleMenu.parent().siblings());
-                    } else {
                         that.state()._dropDownForefatherClickHide(self.next(that.foundation().linkChildClass()), self.next(that.foundation().linkChildClass()));
-                    }
                 });
 
                 that.previousClickElement = self;
@@ -637,11 +632,7 @@ TreeMenu.prototype = {
                 //先关闭掉
                 topElement.removeClass(that.foundation().activeTreeDropDownClass());
                 that.animate().slideUp(topElement.next(that.foundation().linkChildClass()), function () {
-                    if (that.shuttleMenuActive && that.previousClickShuttleMenu) {
-                        that.state()._dropDownForefatherClickHide(that.previousClickShuttleMenu.parent().siblings(), that.previousClickShuttleMenu.parent().siblings());
-                    } else {
-                        that.state()._dropDownForefatherClickHide(topElement.next(that.foundation().linkChildClass()), topElement.next(that.foundation().linkChildClass()));
-                    }
+                    that.state()._dropDownForefatherClickHide(topElement.next(that.foundation().linkChildClass()), topElement.next(that.foundation().linkChildClass()));
                 });
                 that.previousTopElement = that.topElement;
                 that.topElement = self;
