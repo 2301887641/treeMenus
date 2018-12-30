@@ -618,10 +618,9 @@ TreeMenu.prototype = {
              */
             dropDownForefatherClick: function (self) {
                 self.toggleClass(that.foundation().activeTreeDropDownClass());
-                that.animate().slideUp(self.next(that.foundation().linkChildClass()), function () {
-                        that.state()._dropDownForefatherClickHide(self.next(that.foundation().linkChildClass()), self.next(that.foundation().linkChildClass()));
+                that.animate().slideToggle(self.next(that.foundation().linkChildClass()), function () {
+                    that.state()._dropDownForefatherClickHide(self.next(that.foundation().linkChildClass()), self.next(that.foundation().linkChildClass()));
                 });
-
                 that.previousClickElement = self;
             },
             /**
@@ -661,6 +660,7 @@ TreeMenu.prototype = {
              * @param self
              */
             dropDownSiblingClick: function (self) {
+                console.log(that.previousClickElement)
                 //先将之前的收缩
                 that.animate().slideUp(that.previousClickElement.next(that.foundation().linkChildClass()));
                 that.previousClickElement.removeClass(that.foundation().activeTreeDropDownClass());
@@ -767,8 +767,27 @@ TreeMenu.prototype = {
             if (self.hasClass(this.foundation().level1Class())) {
                 return this.state().dropDownTopMenuClick(self);
             }
-            //后代同级点击
-            this.state().dropDownSiblingClick(self);
+            //之前点击的是被点击的后台 不再同一层上
+            if($.contains(this.topElement.parent()[0],self[0]) && $.contains(this.topElement.parent()[0],this.previousClickElement[0])){
+                let selfClassName = self.attr("class"),
+                    previousClassName = that.previousClickElement.attr("class"),
+                    regString = that.foundation().level1Class().substring(0, that.foundation().level1Class().length - 1),
+                    reg = new RegExp(regString + "(\\d+)"),
+                    selfResult = selfClassName.match(reg),
+                    previousResult = previousClassName.match(reg);
+                if (selfResult && previousResult) {
+                    console.log(selfResult[1],previousResult[1])
+                    //当前点击的栏目大于之前点击的栏目
+                    if (selfResult[1] < previousResult[1]) {
+                        console.log(1111111111111)
+                    }else if (selfResult[1] > previousResult[1]){
+                        console.log(2222222222222222)
+                    }else if (selfResult[1] === previousResult[1]){
+                        //后代同级点击
+                        this.state().dropDownSiblingClick(self);
+                    }
+                }
+            }
         }
     },
     //递归解析json
