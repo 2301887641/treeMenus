@@ -550,7 +550,8 @@ TreeMenu.prototype = {
              */
             dropDownMenuWithoutPreviousClickElement: function (self) {
                 that.topElement = self;
-                that.state().dropDownGrandsonClick(self);
+                that.previousClickElement = self;
+                that.state()._dropDownSelfClick(self);
             },
             /**
              * 不存在上一个元素
@@ -565,8 +566,8 @@ TreeMenu.prototype = {
              * @param self
              */
             dropDownSelfClick: function (self, callback) {
-                self.toggleClass(that.foundation().activeTreeDropDownClass());
-                that.animate().slideToggle(self.next(that.foundation().linkChildClass()), callback);
+                //不会有自身点击行为  pass
+                that.state()._dropDownSelfClick(self);
             },
             /**
              * 含有祖孙关系 被点击的是之前点击的后代
@@ -574,7 +575,7 @@ TreeMenu.prototype = {
              */
             dropDownGrandsonClick: function (self, callback) {
                 that.previousClickElement = self;
-                that.state().dropDownSelfClick(self, callback);
+                that.state()._dropDownSelfClick(self, callback);
             },
             /**
              * 含有祖孙关系  点击的是当前顶级栏目的子类
@@ -606,13 +607,22 @@ TreeMenu.prototype = {
              */
             dropDownForefatherClick: function (self) {
                 self.toggleClass(that.foundation().activeTreeDropDownClass());
-                that.animate().slideUp(self.next(that.foundation().linkChildClass()), function () {
-                    //隐藏ul
-                    $(that.foundation().linkChildClass(), self.next(that.foundation().linkChildClass())).hide();
-                    //去除所有子类展开的下拉
-                    $("." + that.foundation().activeTreeDropDownClass(), self.next(that.foundation().linkChildClass())).removeClass(that.foundation().activeTreeDropDownClass());
-                });
+                    that.animate().slideUp(self.next(that.foundation().linkChildClass()), function () {
+                        if(that.previousClickShuttleMenu && $.contains(self.parent()[0],that.previousClickShuttleMenu[0])){
+                            //去除所有子类展开的下拉
+                            that.state()._dropDownForefatherClickHide(that.previousClickShuttleMenu.parent().siblings(),that.previousClickShuttleMenu.parent().siblings());
+                        }else{
+                            that.state()._dropDownForefatherClickHide(self.next(that.foundation().linkChildClass()),self.next(that.foundation().linkChildClass()));
+                        }
+                    });
+
                 that.previousClickElement = self;
+            },
+            _dropDownForefatherClickHide:function(hideElement,removeElement){
+                //隐藏ul
+                $(that.foundation().linkChildClass(), hideElement).hide();
+                //去除所有子类展开的下拉
+                $("." + that.foundation().activeTreeDropDownClass(), removeElement).removeClass(that.foundation().activeTreeDropDownClass());
             },
             /**
              * 跨菜单的顶级菜单的点击
@@ -671,6 +681,10 @@ TreeMenu.prototype = {
                 self.addClass(that.foundation().activeTreeDropDownClass());
                 that.previousClickElement = self;
             },
+            _dropDownSelfClick:function(self,callback){
+                self.toggleClass(that.foundation().activeTreeDropDownClass());
+                that.animate().slideToggle(self.next(that.foundation().linkChildClass()), callback);
+            },
             _shuttleSelfAndRemove: function (self) {
                 that.previousClickShuttleMenu.removeClass(that.foundation().shuttleActive());
                 that.state().shuttleWithoutPreviousClickElement(self);
@@ -699,6 +713,9 @@ TreeMenu.prototype = {
     menuClickCallback: function (self, isShuttleLink) {
         let that = this;
         if (isShuttleLink) {
+            if(!self.hasClass(that.foundation().level1Class())){
+                this.shuttleMenuActive=true
+            }
             //不存在上一个元素
             if (!this.previousClickShuttleMenu) {
                 return this.state().shuttleWithoutPreviousClickElement(self);
