@@ -275,7 +275,7 @@ function TreeMenu(config, callback = function (e) {
     if (!callback instanceof Function) {
         throw Error("argument callback error");
     }
-    this.configure = $.extend(true, {}, TreeMenu.configure, config)
+    this.configure = $.extend(true, {}, TreeMenu.configure, config);
     this.configure.callback = callback;
     this.init();
 }
@@ -394,9 +394,9 @@ TreeMenu.configure = {
     //json数据 默认空数组
     data: [],
     //类型 默认1:菜单 2:树形控件
-    type: 2,
+    type: 1,
     //遍历方式 默认1:递归  其余:迭代+参数
-    traversal: 1,
+    traversal: 2,
     //显示方式: 默认1:直接替换 其余:插入
     display: 1,
     //默认icon图标
@@ -418,24 +418,24 @@ TreeMenu.prototype = {
     constructor: TreeMenu,
     //初始化
     init: function () {
+        //菜单
         if (this.configure.type === 1) {
             let content = $(this.foundation().scroll());
-            this.recursion(this.configure.data, content, 0);
-            this.build(content);
+            //遍历方式 迭代
             if (this.configure.traversal === 1) {
+                this.recursion(this.configure.data, content, 0);
+            } else {
+                this.iterators(this.configure.data, content, 0);
+            }
+            this.build(content);
+            if (this.configure.display === 1) {
                 this.html.appendTo($(this.configure.selector)).unwrap();
             } else {
                 this.html.appendTo($(this.configure.selector));
             }
         } else {
-            let content = $(this.foundation().scroll());
-            this.iterators(this.configure.data, content, 0);
-            this.build(content);
-            if (this.configure.traversal === 1) {
-                this.html.appendTo($(this.configure.selector)).unwrap();
-            } else {
-                this.html.appendTo($(this.configure.selector));
-            }
+            //树结构
+
         }
     },
     //最终构建
@@ -446,7 +446,7 @@ TreeMenu.prototype = {
         this.html = aside;
     },
     /**
-     * 基础html构建
+     * html构建
      * @returns {{aside: aside, nav: nav, scroll: scroll, arrowClass: arrowClass, activeTreeDropDownClass: activeTreeDropDownClass, dropDownMenu: dropDownMenu, icon: (function(*=): (*|string)), ul: ul, li: li, shuttleLink: shuttleLink}}
      */
     foundation: function () {
@@ -527,7 +527,12 @@ TreeMenu.prototype = {
             }
         }
     },
-    abc: function (func) {
+    /**
+     * 递归转迭代的重要函数
+     * @param func
+     * @returns {callback}
+     */
+    reverseToIterator: function (func) {
         let value;
         let active = false;
         let arr = [];
@@ -543,6 +548,10 @@ TreeMenu.prototype = {
             }
         };
     },
+    /**
+     * 状态函数
+     * @returns {{dropDownMenuWithoutPreviousClickElement: dropDownMenuWithoutPreviousClickElement, shuttleWithoutPreviousClickElement: shuttleWithoutPreviousClickElement, dropDownSelfClick: dropDownSelfClick, dropDownGrandsonClick: dropDownGrandsonClick, shuttleGrandsonClick: shuttleGrandsonClick, dropDownForefatherClick: dropDownForefatherClick, dropDownTopMenuClick: dropDownTopMenuClick, shuttleTopMenuClick: shuttleTopMenuClick, dropDownSiblingClick: dropDownSiblingClick, dropDownOtherSiblingClick: dropDownOtherSiblingClick, shuttleChildClick: shuttleChildClick, _dropDownSlideDown: _dropDownSlideDown, _dropDownSelfClick: _dropDownSelfClick, _dropDownForefatherClickHide: _dropDownForefatherClickHide, _shuttleSelfAndRemove: _shuttleSelfAndRemove}}
+     */
     state: function () {
         let that = this;
         return {
@@ -699,8 +708,7 @@ TreeMenu.prototype = {
                 that.state().shuttleWithoutPreviousClickElement(self);
             }
         }
-    }
-    ,
+    },
     /**
      * 菜单绑定事件
      * @param element
@@ -783,7 +791,12 @@ TreeMenu.prototype = {
             }
         }
     },
-    //递归解析json
+    /**
+     * 递归解析json
+     * @param data
+     * @param parent
+     * @param level
+     */
     recursion: function (data, parent, level) {
         ++level;
         for (let i of data) {
@@ -807,8 +820,14 @@ TreeMenu.prototype = {
             }
         }
     },
+    /**
+     * 迭代+参数 解析json
+     * @param data
+     * @param parent
+     * @param level
+     */
     iterators: function (data, parent, level) {
-        let that = this, callback = this.abc(function (data, parent, level) {
+        let that = this, callback = this.reverseToIterator(function (data, parent, level) {
             ++level;
             for (let i of data) {
                 let icon = that.foundation().icon(i.icon),
