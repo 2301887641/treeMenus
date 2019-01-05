@@ -730,6 +730,7 @@ TreeMenu.prototype = {
     menuClickCallback: function (self, isShuttleLink) {
         let that = this;
         if (isShuttleLink) {
+            //关闭同一层的其他未关闭的下拉
             this.state().dropDownOtherSiblingClick(self);
             //不存在上一个元素
             if (!this.previousClickShuttleMenu) {
