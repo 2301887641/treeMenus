@@ -660,10 +660,19 @@ TreeMenu.prototype = {
              * @param self
              */
             dropDownSiblingClick: function (self) {
-                console.log(that.previousClickElement)
                 //先将之前的收缩
                 that.animate().slideUp(that.previousClickElement.next(that.foundation().linkChildClass()));
                 that.previousClickElement.removeClass(that.foundation().activeTreeDropDownClass());
+                that.state()._dropDownSlideDown(self);
+            },
+            /**
+             * 之前点击的是被点击的后代 不再同一层上
+             * @param self
+             */
+            dropDownOtherSiblingClick:function(self){
+                let parent=self.parent().siblings().has("."+that.foundation().activeTreeDropDownClass());
+                that.animate().slideUp($(that.foundation().linkChildClass(),parent));
+                $("." + that.foundation().activeTreeDropDownClass(), parent).removeClass(that.foundation().activeTreeDropDownClass());
                 that.state()._dropDownSlideDown(self);
             },
             /**
@@ -721,9 +730,6 @@ TreeMenu.prototype = {
     menuClickCallback: function (self, isShuttleLink) {
         let that = this;
         if (isShuttleLink) {
-            if (!self.hasClass(that.foundation().level1Class())) {
-                this.shuttleMenuActive = true
-            }
             //不存在上一个元素
             if (!this.previousClickShuttleMenu) {
                 return this.state().shuttleWithoutPreviousClickElement(self);
@@ -734,7 +740,6 @@ TreeMenu.prototype = {
             }
             //一级菜单的点击
             if (self.hasClass(this.foundation().level1Class())) {
-                this.shuttleMenuActive = false
                 return this.state().shuttleTopMenuClick(self);
             }
             //含有祖孙关系  点击的是当前顶级栏目的子类
@@ -767,7 +772,7 @@ TreeMenu.prototype = {
             if (self.hasClass(this.foundation().level1Class())) {
                 return this.state().dropDownTopMenuClick(self);
             }
-            //之前点击的是被点击的后台 不再同一层上
+            //之前点击的是被点击的后代 不再同一层上
             if($.contains(this.topElement.parent()[0],self[0]) && $.contains(this.topElement.parent()[0],this.previousClickElement[0])){
                 let selfClassName = self.attr("class"),
                     previousClassName = that.previousClickElement.attr("class"),
@@ -776,12 +781,9 @@ TreeMenu.prototype = {
                     selfResult = selfClassName.match(reg),
                     previousResult = previousClassName.match(reg);
                 if (selfResult && previousResult) {
-                    console.log(selfResult[1],previousResult[1])
                     //当前点击的栏目大于之前点击的栏目
                     if (selfResult[1] < previousResult[1]) {
-                        console.log(1111111111111)
-                    }else if (selfResult[1] > previousResult[1]){
-                        console.log(2222222222222222)
+                        this.state().dropDownOtherSiblingClick(self);
                     }else if (selfResult[1] === previousResult[1]){
                         //后代同级点击
                         this.state().dropDownSiblingClick(self);
@@ -805,7 +807,7 @@ TreeMenu.prototype = {
                 this.recursion(i[this.configure.field.subMenu], ul, level);
             } else {
                 let link = $(this.foundation().dropDownMenu(icon, i.name, false, level));
-                link.attr("_url", i[this.configure.field.url])
+                link.attr("_url", i[this.configure.field.url]);
                 this.menuBinding(link, true);
                 li.append(link);
                 parent.append(li);
