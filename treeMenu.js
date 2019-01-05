@@ -394,7 +394,7 @@ TreeMenu.configure = {
     //json数据 默认空数组
     data: [],
     //类型 默认1:菜单 2:树形控件
-    type: 1,
+    type: 2,
     //遍历方式 默认1:递归  其余:迭代+参数
     traversal: 1,
     //显示方式: 默认1:直接替换 其余:插入
@@ -428,7 +428,14 @@ TreeMenu.prototype = {
                 this.html.appendTo($(this.configure.selector));
             }
         } else {
-            this.iterators(this.configure.data);
+            let content = $(this.foundation().scroll());
+            this.iterators(this.configure.data, content, 0);
+            this.build(content);
+            if (this.configure.traversal === 1) {
+                this.html.appendTo($(this.configure.selector)).unwrap();
+            } else {
+                this.html.appendTo($(this.configure.selector));
+            }
         }
     },
     //最终构建
@@ -791,37 +798,40 @@ TreeMenu.prototype = {
                 this.recursion(i[this.configure.field.subMenu], ul, level);
             } else {
                 let link = $(this.foundation().dropDownMenu(icon, i.name, false, level));
-                link.attr("_url", i[this.configure.field.url]);
+                if (this.configure.type === 1) {
+                    link.attr("_url", i[this.configure.field.url]);
+                }
                 this.menuBinding(link, true);
                 li.append(link);
                 parent.append(li);
             }
         }
     },
-    iterators: function (data) {
-        // let that = this, callback = this.recursion(function (obj) {
-        //     for(let i of obj){
-        //         if (i[that.structure.subMenu]) {
-        //             that.html+='<li class="sidebar-item">\n' +
-        //                 '<a class="sidebar-link sidebar-link-active sidebar-link-has-arrow" href="#">\n' +
-        //                 '<i class="fa fa-cogs" aria-hidden="true">xxx</i>\n' +
-        //                 `<span class="sidebar-link-menu">${i.name}</span>\n` +
-        //                 '<i>000</i>\n' +
-        //                 '</a>\n' +
-        //                 '<ul class="sidebar-nav-ul-child">';
-        //             callback(i[that.structure.subMenu]);
-        //             that.html+="</li></ul>";
-        //         }else{
-        //             that.html+='<li class="sidebar-item">\n' +
-        //                 '<a class="sidebar-link" href="#">\n' +
-        //                 '<i class="mdi mdi-adjust">xxx</i>\n' +
-        //                 `<span class="menu">${i.name}</span>\n` +
-        //                 '</a>\n' +
-        //                 '</li>'
-        //         }
-        //     }
-        // });
-        //     callback(this.data)
+    iterators: function (data, parent, level) {
+        let that = this, callback = this.abc(function (data, parent, level) {
+            ++level;
+            for (let i of data) {
+                let icon = that.foundation().icon(i.icon),
+                    li = $(that.foundation().li(level));
+                if (i[that.configure.field.subMenu]) {
+                    let ul = $(that.foundation().ul()),
+                        a = $(that.foundation().dropDownMenu(icon, i.name, true, level));
+                    that.menuBinding(a, false);
+                    li.append(a).append(ul);
+                    parent.append(li);
+                    callback(i[that.configure.field.subMenu], ul, level);
+                } else {
+                    let link = $(that.foundation().dropDownMenu(icon, i.name, false, level));
+                    if (that.configure.type === 1) {
+                        link.attr("_url", i[that.configure.field.url]);
+                    }
+                    that.menuBinding(link, true);
+                    li.append(link);
+                    parent.append(li);
+                }
+            }
+        });
+        callback(data, parent, 0)
     }
 }
 
