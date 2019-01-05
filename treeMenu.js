@@ -556,7 +556,7 @@ TreeMenu.prototype = {
              * 上一个元素是当前元素
              * @param self
              */
-            dropDownSelfClick: function (self, callback) {
+            dropDownSelfClick: function (self) {
                 //不会有自身点击行为  pass
                 that.state()._dropDownSelfClick(self);
             },
@@ -564,9 +564,9 @@ TreeMenu.prototype = {
              * 含有祖孙关系 被点击的是之前点击的后代
              * @param self
              */
-            dropDownGrandsonClick: function (self, callback) {
+            dropDownGrandsonClick: function (self) {
                 that.previousClickElement = self;
-                that.state()._dropDownSelfClick(self, callback);
+                that.state()._dropDownSelfClick(self);
             },
             /**
              * 含有祖孙关系  点击的是当前顶级栏目的子类
