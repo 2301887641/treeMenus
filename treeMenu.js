@@ -630,7 +630,8 @@ TreeMenu.prototype = {
             dropDownTopMenuClick: function (self) {
                 let topElement = that.topElement;
                 //先关闭掉
-                topElement.removeClass(that.foundation().activeTreeDropDownClass());
+                $("." + that.foundation().activeTreeDropDownClass(), topElement).removeClass(that.foundation().activeTreeDropDownClass());
+                console.log(topElement)
                 that.animate().slideUp(topElement.next(that.foundation().linkChildClass()), function () {
                     that.state()._dropDownForefatherClickHide(topElement.next(that.foundation().linkChildClass()), topElement.next(that.foundation().linkChildClass()));
                 });
