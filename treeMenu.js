@@ -434,8 +434,8 @@ TreeMenu.prototype = {
     //最终构建
     build: function (content) {
         let nav = $(this.foundation().nav());
-        let aside = $(this.foundation().aside()).append(nav)
-        nav.append(content)
+        let aside = $(this.foundation().aside()).append(nav);
+        nav.append(content);
         this.html = aside;
     },
     /**
@@ -498,6 +498,10 @@ TreeMenu.prototype = {
             }
         }
     },
+    /**
+     * 动画相关
+     * @returns {{slideUp: slideUp, slideDown: slideDown, slideToggle: slideToggle}}
+     */
     animate: function () {
         let that = this;
         return {
