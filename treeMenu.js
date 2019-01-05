@@ -263,7 +263,7 @@ let menu = [
     {id: 5, level: 1, name: 'API 参考手册', icon: "fa fa-car", type: "link", parentId: 0, url: "/detail/api"}
 ];
 
-function TreeMenu(config, callback = function () {
+function TreeMenu(config, callback = function (e) {
     alert("被点击的元素:" + e + " 被点击元素的url: " + url)
 }) {
     if (typeof $ === 'undefined') {
@@ -277,7 +277,6 @@ function TreeMenu(config, callback = function () {
     }
     this.configure = $.extend(true, {}, TreeMenu.configure, config)
     this.configure.callback = callback;
-    this.isCloseChild = true;
     this.init();
 }
 
@@ -415,8 +414,6 @@ TreeMenu.configure = {
     //默认中间的前缀
     defaultMiddlePrefix: "treeMenu"
 }
-//结构
-TreeMenu.structure = {id: "id", level: "level", name: "name", type: "type", url: "url", subMenu: "subMenu"};
 TreeMenu.prototype = {
     constructor: TreeMenu,
     //初始化
@@ -446,75 +443,58 @@ TreeMenu.prototype = {
      * @returns {{aside: aside, nav: nav, scroll: scroll, arrowClass: arrowClass, activeTreeDropDownClass: activeTreeDropDownClass, dropDownMenu: dropDownMenu, icon: (function(*=): (*|string)), ul: ul, li: li, shuttleLink: shuttleLink}}
      */
     foundation: function () {
-        let that = this;
+        let that = this,
+            defaultTreeMenuClassPrefix = this.configure.defaultTreeMenuClassPrefix,
+            defaultMiddlePrefix = this.configure.defaultMiddlePrefix;
         return {
             aside: function () {
-                //treeMenu
-                if (that.configure.type === 1) {
-                    return TreeMenu.framework.aside(that.configure.defaultTreeMenuClassPrefix, that.configure.defaultMiddlePrefix);
-                }
+                return TreeMenu.framework.aside(defaultTreeMenuClassPrefix, defaultMiddlePrefix);
             },
             nav: function () {
-                if (that.configure.type === 1) {
-                    return TreeMenu.framework.nav(that.configure.defaultTreeMenuClassPrefix, that.configure.defaultMiddlePrefix);
-                }
+                return TreeMenu.framework.nav(defaultTreeMenuClassPrefix, defaultMiddlePrefix);
             },
             scroll: function () {
-                if (that.configure.type === 1) {
-                    return TreeMenu.framework.scroll(that.configure.defaultTreeMenuClassPrefix, that.configure.defaultMiddlePrefix);
-                }
+                return TreeMenu.framework.scroll(defaultTreeMenuClassPrefix, defaultMiddlePrefix);
             },
             arrowClass: function () {
-                if (that.configure.type === 1) {
-                    return TreeMenu.framework.defaultArrowClass(that.configure.defaultTreeMenuClassPrefix, that.configure.defaultMiddlePrefix);
-                }
+                return TreeMenu.framework.defaultArrowClass(defaultTreeMenuClassPrefix, defaultMiddlePrefix);
             },
             activeTreeDropDownClass: function () {
-                if (that.configure.type === 1) {
-                    return TreeMenu.framework.defaultActiveTreeDropDownClass(that.configure.defaultTreeMenuClassPrefix, that.configure.defaultMiddlePrefix);
-                }
+                return TreeMenu.framework.defaultActiveTreeDropDownClass(defaultTreeMenuClassPrefix, defaultMiddlePrefix);
             },
             dropDownMenu: function (icon, name, hasChild, level) {
                 let spanPadding = "style='left:" + level * that.configure.relativeLeft + "px;'";
-                if (that.configure.type === 1) {
-                    return TreeMenu.framework.dropDownMenu(
-                        that.configure.defaultTreeMenuClassPrefix,
-                        that.configure.defaultMiddlePrefix,
-                        icon,
-                        name,
-                        hasChild,
-                        level,
-                        that.foundation().arrowClass(),
-                        spanPadding
-                    );
-                }
+                return TreeMenu.framework.dropDownMenu(
+                    defaultTreeMenuClassPrefix,
+                    defaultMiddlePrefix,
+                    icon,
+                    name,
+                    hasChild,
+                    level,
+                    that.foundation().arrowClass(),
+                    spanPadding
+                );
             },
             icon: function (icon) {
                 return !!icon ? TreeMenu.framework.icon(icon) : !!that.configure.icon ? TreeMenu.framework.icon(that.configure.icon) : "";
             },
             ul: function () {
-                if (that.configure.type === 1) {
-                    return TreeMenu.framework.ul(that.configure.defaultTreeMenuClassPrefix, that.configure.defaultMiddlePrefix);
-                }
+                return TreeMenu.framework.ul(defaultTreeMenuClassPrefix, defaultMiddlePrefix);
             },
             li: function (level) {
-                if (that.configure.type === 1) {
-                    return TreeMenu.framework.li(that.configure.defaultTreeMenuClassPrefix, that.configure.defaultMiddlePrefix, level);
-                }
+                return TreeMenu.framework.li(defaultTreeMenuClassPrefix, defaultMiddlePrefix, level);
             },
             shuttleLink: function () {
-                if (that.configure.type === 1) {
-                    return TreeMenu.framework.shuttleLink(that.configure.defaultTreeMenuClassPrefix, that.configure.defaultMiddlePrefix);
-                }
+                return TreeMenu.framework.shuttleLink(defaultTreeMenuClassPrefix, defaultMiddlePrefix);
             },
             linkChildClass: function () {
-                return "." + that.configure.defaultTreeMenuClassPrefix + '-' + that.configure.defaultMiddlePrefix + "-link-child";
+                return "." + defaultTreeMenuClassPrefix + '-' + defaultMiddlePrefix + "-link-child";
             },
             level1Class: function () {
-                return that.configure.defaultTreeMenuClassPrefix + "-" + that.configure.defaultMiddlePrefix + "-link-level1";
+                return defaultTreeMenuClassPrefix + "-" + defaultMiddlePrefix + "-link-level1";
             },
             shuttleActive: function () {
-                return that.configure.defaultTreeMenuClassPrefix + '-' + that.configure.defaultMiddlePrefix + '-shuttle-active';
+                return defaultTreeMenuClassPrefix + '-' + defaultMiddlePrefix + '-shuttle-active';
             }
         }
     },
@@ -669,9 +649,9 @@ TreeMenu.prototype = {
              * 之前点击的是被点击的后代 不再同一层上
              * @param self
              */
-            dropDownOtherSiblingClick:function(self){
-                let parent=self.parent().siblings().has("."+that.foundation().activeTreeDropDownClass());
-                that.animate().slideUp($(that.foundation().linkChildClass(),parent));
+            dropDownOtherSiblingClick: function (self) {
+                let parent = self.parent().siblings().has("." + that.foundation().activeTreeDropDownClass());
+                that.animate().slideUp($(that.foundation().linkChildClass(), parent));
                 $("." + that.foundation().activeTreeDropDownClass(), parent).removeClass(that.foundation().activeTreeDropDownClass());
                 that.state()._dropDownSlideDown(self);
             },
@@ -773,7 +753,7 @@ TreeMenu.prototype = {
                 return this.state().dropDownTopMenuClick(self);
             }
             //之前点击的是被点击的后代 不再同一层上
-            if($.contains(this.topElement.parent()[0],self[0]) && $.contains(this.topElement.parent()[0],this.previousClickElement[0])){
+            if ($.contains(this.topElement.parent()[0], self[0]) && $.contains(this.topElement.parent()[0], this.previousClickElement[0])) {
                 let selfClassName = self.attr("class"),
                     previousClassName = that.previousClickElement.attr("class"),
                     regString = that.foundation().level1Class().substring(0, that.foundation().level1Class().length - 1),
@@ -784,7 +764,7 @@ TreeMenu.prototype = {
                     //当前点击的栏目大于之前点击的栏目
                     if (selfResult[1] < previousResult[1]) {
                         this.state().dropDownOtherSiblingClick(self);
-                    }else if (selfResult[1] === previousResult[1]){
+                    } else if (selfResult[1] === previousResult[1]) {
                         //后代同级点击
                         this.state().dropDownSiblingClick(self);
                     }
