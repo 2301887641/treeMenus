@@ -428,11 +428,12 @@ TreeMenu.prototype = {
                 this.iterators(this.configure.data, content, 0);
             }
             this.build(content);
+            //直接替换
             if (this.configure.display === 1) {
                 this.html.appendTo($(this.configure.selector)).unwrap();
-            } else {
-                this.html.appendTo($(this.configure.selector));
+                return
             }
+            this.html.appendTo($(this.configure.selector));
         } else {
             //树结构
 
