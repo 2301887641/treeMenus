@@ -386,7 +386,7 @@ TreeMenu.framework = {
     shuttleLink: function (base, middlePrefix) {
         return base + "-" + middlePrefix + "-shuttle-link";
     }
-}
+};
 //配置
 TreeMenu.configure = {
     //默认选择器
@@ -413,7 +413,7 @@ TreeMenu.configure = {
     defaultMiniTreeMenuClassPrefix: "monster-mini",
     //默认中间的前缀
     defaultMiddlePrefix: "treeMenu"
-}
+};
 TreeMenu.prototype = {
     constructor: TreeMenu,
     //初始化
@@ -730,6 +730,7 @@ TreeMenu.prototype = {
     menuClickCallback: function (self, isShuttleLink) {
         let that = this;
         if (isShuttleLink) {
+            this.state().dropDownOtherSiblingClick(self);
             //不存在上一个元素
             if (!this.previousClickShuttleMenu) {
                 return this.state().shuttleWithoutPreviousClickElement(self);
