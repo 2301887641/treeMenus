@@ -629,12 +629,13 @@ TreeMenu.prototype = {
              */
             dropDownTopMenuClick: function (self) {
                 let topElement = that.topElement;
-                //先关闭掉
-                $("." + that.foundation().activeTreeDropDownClass(), topElement).removeClass(that.foundation().activeTreeDropDownClass());
-                console.log(topElement)
-                that.animate().slideUp(topElement.next(that.foundation().linkChildClass()), function () {
-                    that.state()._dropDownForefatherClickHide(topElement.next(that.foundation().linkChildClass()), topElement.next(that.foundation().linkChildClass()));
-                });
+                if(topElement){
+                    //先关闭掉
+                    $("." + that.foundation().activeTreeDropDownClass(), topElement).removeClass(that.foundation().activeTreeDropDownClass());
+                    that.animate().slideUp(topElement.next(that.foundation().linkChildClass()), function () {
+                        that.state()._dropDownForefatherClickHide(topElement.next(that.foundation().linkChildClass()), topElement.next(that.foundation().linkChildClass()));
+                    });
+                }
                 that.previousTopElement = that.topElement;
                 that.topElement = self;
                 that.state()._dropDownSlideDown(self);
