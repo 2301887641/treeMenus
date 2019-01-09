@@ -631,7 +631,7 @@ TreeMenu.prototype = {
                 let topElement = that.topElement;
                 if(topElement){
                     //先关闭掉
-                    $("." + that.foundation().activeTreeDropDownClass(), topElement).removeClass(that.foundation().activeTreeDropDownClass());
+                    topElement.removeClass(that.foundation().activeTreeDropDownClass());
                     that.animate().slideUp(topElement.next(that.foundation().linkChildClass()), function () {
                         that.state()._dropDownForefatherClickHide(topElement.next(that.foundation().linkChildClass()), topElement.next(that.foundation().linkChildClass()));
                     });
@@ -649,7 +649,7 @@ TreeMenu.prototype = {
                     let ul = that.topElement.next(that.foundation().linkChildClass());
                     that.animate().slideUp(ul, function () {
                         //清除箭头
-                        $("." + that.foundation().activeTreeDropDownClass(), ul).removeClass(that.foundation().activeTreeDropDownClass());
+                        ul.removeClass(that.foundation().activeTreeDropDownClass());
                         //隐藏ul
                         $(that.foundation().linkChildClass(), ul).hide();
                         that.topElement.removeClass(that.foundation().activeTreeDropDownClass());
@@ -732,10 +732,10 @@ TreeMenu.prototype = {
     menuClickCallback: function (self, isShuttleLink) {
         let that = this;
         if (isShuttleLink) {
-            //关闭同一层的其他未关闭的下拉
-            this.state().dropDownOtherSiblingClick(self);
             //不存在上一个元素
             if (!this.previousClickShuttleMenu) {
+                //关闭同一层的其他未关闭的下拉
+                this.state().dropDownOtherSiblingClick(self);
                 return this.state().shuttleWithoutPreviousClickElement(self);
             }
             //上一个元素是当前元素
